@@ -7,19 +7,18 @@
     %meta{:"http-equiv"=>"Content-Type", :content=>"text/html", :charset=>"utf-8"}
       %link{:rel => :stylesheet, :href => "./jsmn_stylesheet.sass", :type => "text/css"}
 
-        %body
-          %h1.title Result
-          //%p== Document MD5 hash : #{@abst.bag_of_words}
-          %table
-            %tr
-              %th PubMed id
-              %th URL
-              %th Similarity
-              - @similarity.each do |v|
-                %tr
-                  %td= v[0]
-                  %td
-                    %a{:href => "http://www.ncbi.nlm.nih.gov/pubmed/#{v[0]}"}#{@paper_title[v[0]]}
-                  %td== #{sprintf("%.5f",v[1])}
-                      
-          %a{:href => "/JSMN"}top
+  %body
+    %h1.title Result
+    %table
+      %tr
+        %th PubMed id
+        %th URL
+        %th Similarity
+        - @similarity.each do |v|
+          %tr
+            %td= v[0]
+            %td
+              %a{:href => "http://www.ncbi.nlm.nih.gov/pubmed/#{v[0]}"} #{@paper_title[v[0]]}
+            %td== #{sprintf("%.5f",v[1])}
+                
+    %a{:href => "/JSMN"}top
