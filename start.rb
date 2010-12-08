@@ -3,6 +3,7 @@ require "sinatra"
 require "haml"
 require "sass"
 require "open-uri"
+require "yaml"
 require "./lib/abstract_spliter.rb"
 
 helpers do
@@ -16,6 +17,7 @@ end
 
 get '/?' do
   haml :index
+  @config = YAML.load_file("./config.yaml")
 end
 
 post '/result' do
@@ -24,9 +26,10 @@ post '/result' do
     @abst.filter_alphabet
     @abst.set_bag_of_words
     @abst.write_bag_of_words
-    system "~/TinySimHash/simhash --q /tmp/jsmn_#{@abst.abst_md5} \\
-    --fserver localhost:90001 --hserver localhost:90002 \\
-    --fast -l 10 -k 2 >> /Users/y_benjo/JSMN/data/db/var/log_simhash"
+    system "#{@config[simhash_path]}/simhash --q /tmp/jsmn_#{@abst.abst_md5} \\
+    --fserver localhost:#{@config[fserver_port]} \\
+    --hserver localhost:#{@config[hserver_port]} \\
+    --fast -l #{@config[l]} -k #{@config[k]} >> #{@config[output_log]}"
 
     @similarity = []
     @paper_title = Hash.new{ }
