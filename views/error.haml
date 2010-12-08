@@ -1,0 +1,14 @@
+!!! XML
+!!! Strict
+
+%html
+  %head
+    %title Error - JSMN (Journal Suggstion using MedliNe)
+    %meta{:"http-equiv"=>"Content-Type", :content=>"text/html", :charset=>"utf-8"}
+      %link{:rel => :stylesheet, :href => "./jsmn_stylesheet.sass", :type => "text/css"}
+
+        %body
+          %h1.title Error
+          %p== #{@error_message}
+          %p== #{@error_message.backtrace}
+          %a{:href => "/JSMN"}top
