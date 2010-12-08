@@ -17,19 +17,19 @@ end
 
 get '/?' do
   haml :index
-  @config = YAML.load_file("./config.yaml")
 end
 
 post '/result' do
   begin
+    @config = YAML.load_file("./config.yaml")
     @abst = AbstractSpliter.new(params[:abstract])
     @abst.filter_alphabet
     @abst.set_bag_of_words
     @abst.write_bag_of_words
-    system "#{@config[simhash_path]}/simhash --q /tmp/jsmn_#{@abst.abst_md5} \\
-    --fserver localhost:#{@config[fserver_port]} \\
-    --hserver localhost:#{@config[hserver_port]} \\
-    --fast -l #{@config[l]} -k #{@config[k]} >> #{@config[output_log]}"
+    system "#{@config["simhash_path"]}/simhash --q /tmp/jsmn_#{@abst.abst_md5} \\
+    --fserver localhost:#{@config["fserver_port"]} \\
+    --hserver localhost:#{@config["hserver_port"]} \\
+    --fast -l #{@config["l"]} -k #{@config["k"]} >> #{@config["output_log"]}"
 
     @similarity = []
     @paper_title = Hash.new{ }
