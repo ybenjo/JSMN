@@ -5,7 +5,7 @@ require "#{File::expand_path(File::dirname(__FILE__))}/access_db.rb"
 include AccessDB
 
 $KCODE = "u"
-ABST_LENGTH = 600
+ABST_LENGTH = 1000
 DATA_PATH = "/tmp"
 
 #Classes
