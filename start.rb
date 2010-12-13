@@ -29,7 +29,7 @@ post '/result' do
     system "#{@config["simhash_path"]}/simhash --q /tmp/jsmn_#{@abst.abst_md5} \\
     --fserver localhost:#{@config["fserver_port"]} \\
     --hserver localhost:#{@config["hserver_port"]} \\
-    --fast -l #{@config["l"]} -k #{@config["k"]} >> #{@config["output_log"]}"
+    --fast --limit #{@config["l"]} -k #{@config["k"]} >> #{@config["output_log"]}"
 
     @similarity = []
     @paper_title = Hash.new{ }
