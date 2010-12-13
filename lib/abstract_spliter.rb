@@ -5,14 +5,13 @@ require "#{File::expand_path(File::dirname(__FILE__))}/access_db.rb"
 include AccessDB
 
 $KCODE = "u"
-ABST_LENGTH = 1000
 DATA_PATH = "/tmp"
 
 #Classes
 class AbstractSpliter
   attr_reader :abst, :abst_md5, :filterd_abst, :bag_of_words
   def initialize(abst)
-    @abst = abst.split(//)[0..(ABST_LENGTH - 1)].join("")
+    @abst = abst
     set_abst_md5
   end
 
