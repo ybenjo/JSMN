@@ -11,14 +11,11 @@
     %h1.title Result
     %table
       %tr
-        %th PubMed id
-        %th URL
+        %th Journal title
         %th Similarity
         - @similarity.each do |v|
           %tr
-            %td= v[0]
-            %td
-              %a{:href => "http://www.ncbi.nlm.nih.gov/pubmed/#{v[0]}"} #{@paper_title[v[0]]}
+            %td== #{@content_title[v[0]]}
             %td== #{sprintf("%.5f",v[1])}
                 
     %a{:href => "/JSMN"}top

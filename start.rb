@@ -5,6 +5,8 @@ require "sass"
 require "open-uri"
 require "yaml"
 require "./lib/abstract_spliter.rb"
+require "./lib/access_db.rb"
+
 
 helpers do
   include Rack::Utils; alias_method :h, :escape_html
@@ -21,6 +23,7 @@ end
 
 post '/result' do
   begin
+    # include AccessDB
     @config = YAML.load_file("./config.yaml")
     @abst = AbstractSpliter.new(params[:abstract])
     @abst.filter_alphabet
@@ -32,19 +35,20 @@ post '/result' do
     --fast --limit #{@config["l"]} -k #{@config["k"]} >> #{@config["output_log"]}"
 
     @similarity = []
-    @paper_title = Hash.new{ }
+    @content_title = Hash.new{ }
     open("/tmp/jsmn_#{@abst.abst_md5}.out"){|f|
       f.each{|l|
         id, score = l.chomp.split(",")
         @similarity.push [id.to_s, score.to_f]
-        @paper_title[id.to_s] = open("http://togows.dbcls.jp/entry/pubmed/#{id.to_s}/ti").read
+        # @paper_title[id.to_s] = open("http://togows.dbcls.jp/entry/pubmed/#{id.to_s}/ti").read
+        @content_title[id] = AccessDB.get_journal_string(id)
       }
     }
     @abst.delete_bag_of_words
     
     haml :result
   rescue => @error_message
-    @abst.delete_bag_of_words
+    # @abst.delete_bag_of_words
     haml :error
   end
 end
