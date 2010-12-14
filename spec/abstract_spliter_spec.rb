@@ -3,16 +3,16 @@ require '../lib/abstract_spliter.rb'
 
 describe AbstractSpliter do
   describe "filter_alphabet" do
-    it "アルファベット以外の文字列を空白に置換して文末の空白も消してdowncaseする" do
-      @abst = AbstractSpliter.new("a1a2a3.1XYA ")
+    it "カッコをスペースに置換しスペースで区切って文末の空白も消してdowncaseする" do
+      @abst = AbstractSpliter.new("(123aasbc) ")
       @abst.filter_alphabet
-      @abst.filterd_abst.should == "a a a xya"
+      @abst.filterd_abst.should == "123aasbc"
     end
 
     it "2つ以上の空白は一つにする" do
       @abst = AbstractSpliter.new("a           b               c1           ")
       @abst.filter_alphabet
-      @abst.filterd_abst.should == "a b c"
+      @abst.filterd_abst.should == "a b c1"
     end
 
     it "日本語も削る" do
@@ -21,14 +21,6 @@ describe AbstractSpliter do
       @abst.filterd_abst.should == "twitter shinu"
     end
   end
-
-#   describe "set_abst_md5" do 
-#     it "文字列をmd5ハッシュに変換する" do
-#       @abst = AbstractSpliter.new("apple")
-#       @abst.set_abst_md5
-#       @abst.abst_md5.should == "1f3870be274f6c49b3e31a0c6728957f"
-#     end
-#   end
 
   describe "set_bag_of_words" do
     it "1st case" do

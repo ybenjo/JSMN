@@ -20,9 +20,20 @@ class AbstractSpliter
   end
 
   def filter_alphabet
-    @filterd_abst = @abst.gsub(/\n/, "").gsub(/[^a-zA-Z]/, " ").gsub(/(\s{2,})/," ").gsub(/^\s|\s$/, "").downcase
+    tmp = []
+    abst_ary = @abst.gsub(/\(|\)|\{|\}/, " ").downcase.split(" ")
+    abst_ary.each do |e|
+      if e =~ /[a-z]/
+        if e =~ /[0-9]/
+          tmp.push e.sub(/[\.,]{1,}$/, "")
+        else
+          tmp.push e.gsub(/[^a-z]/," ")
+        end
+      end
+    end
+    @filterd_abst = tmp.join(" ").gsub(/(\s{2,})/," ").gsub(/^\s|\s$/, "")
   end
-
+  
   def set_bag_of_words
     filterd_abst_ary = @filterd_abst.split(" ")
 
