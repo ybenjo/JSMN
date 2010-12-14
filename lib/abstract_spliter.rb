@@ -44,7 +44,7 @@ class AbstractSpliter
     filterd_abst_ary.each do |w|
       @bag_of_words[w] += 1
     end
-    raise ShortAbstractError if @bag_of_words.size < 2
+
   end
 
   def write_bag_of_words
@@ -54,6 +54,7 @@ class AbstractSpliter
         value = AccessDB.get_word_id(k)
         tmp.push "#{value}:#{v}" if !value.nil?
       end
+      raise ShortAbstractError if tmp.size < 2
       f.puts tmp.join(" ")
     }
   end

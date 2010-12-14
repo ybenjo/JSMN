@@ -1,5 +1,5 @@
 #config abuut tinysimhash
-simhash_path: ~/TinySimHash
+simhash_path: /Users/y_benjo/TinySimHash
 fserver_port: 90001
 hserver_port: 90002
 k: 3
