@@ -37,14 +37,14 @@ class AbstractSpliter
   def set_bag_of_words
     filterd_abst_ary = @filterd_abst.split(" ")
 
-    #3文字未満の単語は削除
-    filterd_abst_ary.delete_if{|w|w.size < 3}
+    # filterd_abst_ary.delete_if{|w|w.size < 3}
     
     raise ShortAbstractError if filterd_abst_ary.size < 1
     @bag_of_words = Hash.new{0}
     filterd_abst_ary.each do |w|
       @bag_of_words[w] += 1
     end
+    raise ShortAbstractError if @bag_of_words.size < 2
   end
 
   def write_bag_of_words

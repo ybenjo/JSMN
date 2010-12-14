@@ -28,11 +28,16 @@ post '/result' do
     @abst.filter_alphabet
     @abst.set_bag_of_words
     @abst.write_bag_of_words
+
+    raise NoSimHashError if !File.exist?("#{@config["simhash_path"]}/simhash")
+    
     system "#{@config["simhash_path"]}/simhash --q /tmp/jsmn_#{@abst.abst_md5} \\
     --fserver localhost:#{@config["fserver_port"]} \\
     --hserver localhost:#{@config["hserver_port"]} \\
     --fast --normal --limit #{@config["l"]} -k #{@config["k"]} >> #{@config["output_log"]}"
 
+    raise UnexpectedError if !File.exist?("/tmp/jsmn_#{@abst.abst_md5}.out")
+    
     @similarity = []
     @content_title = Hash.new{ }
     open("/tmp/jsmn_#{@abst.abst_md5}.out"){|f|
@@ -47,7 +52,7 @@ post '/result' do
     
     haml :result
   rescue => @error_message
-    # @abst.delete_bag_of_words
+    @abst.delete_bag_of_words
     haml :error
   end
 end

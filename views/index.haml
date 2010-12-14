@@ -9,7 +9,7 @@
 
   %body
     %h1.title Journal Suggstion using MedliNe (JSMN)
-    %p Input your paper's abstract or keywords
+    %p Input your paper's abstract or keywords (more than 2 words)
     %form{:action => "/JSMN/result", :method => "POST"}
       %textarea{:type => "textarea", :name => "abstract", :cols => "60", :rows => "6"}
       %input{:type => "submit", :value => "submit"}
