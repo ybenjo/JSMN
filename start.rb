@@ -23,7 +23,6 @@ end
 
 post '/result' do
   begin
-    # include AccessDB
     @config = YAML.load_file("./config.yaml")
     @abst = AbstractSpliter.new(params[:abstract])
     @abst.filter_alphabet
@@ -32,7 +31,7 @@ post '/result' do
     system "#{@config["simhash_path"]}/simhash --q /tmp/jsmn_#{@abst.abst_md5} \\
     --fserver localhost:#{@config["fserver_port"]} \\
     --hserver localhost:#{@config["hserver_port"]} \\
-    --fast --limit #{@config["l"]} -k #{@config["k"]} >> #{@config["output_log"]}"
+    --fast --normal --limit #{@config["l"]} -k #{@config["k"]} >> #{@config["output_log"]}"
 
     @similarity = []
     @content_title = Hash.new{ }
