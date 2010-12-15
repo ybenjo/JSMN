@@ -42,6 +42,16 @@ class BOWDatabaseDownError < StandardError
   end
 end
 
+class MutualInformationDatabaseDownError < StandardError
+  def initialize(*args)
+    if args.empty?
+      super("Sorry, mutual infomation database is down.")
+    else
+      super(*args)
+    end
+  end
+end
+
 
 class UnexpectedError < StandardError
   def initialize(*args)
