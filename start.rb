@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require "rubygems"
 require "sinatra"
 require "haml"
@@ -44,10 +45,21 @@ post '/result' do
       f.each{|l|
         id, score = l.chomp.split(",")
         @similarity.push [id.to_s, score.to_f]
-        # @paper_title[id.to_s] = open("http://togows.dbcls.jp/entry/pubmed/#{id.to_s}/ti").read
         @content_title[id] = AccessDB.get_journal_string(id)
       }
     }
+
+    #特徴語出力用
+    @journals = [ ]
+    @similarity.each do |e|
+      @journals.push e[0].to_i
+    end
+
+    @top_words = AccessDB.set_top3_mutual_info(@abst.bag_of_words, @journals)
+#     @top_words.each_key do |key|
+#       @top_words[key] = AccessDB.get_word_ids_string(@top_words[key])
+#     end
+    
     @abst.delete_bag_of_words
     
     haml :result

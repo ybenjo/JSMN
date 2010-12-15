@@ -13,9 +13,11 @@
       %tr
         %th Journal title
         %th Similarity
+        %th Specific words
         - @similarity.each do |v|
           %tr
             %td== #{@content_title[v[0]]}
             %td== #{sprintf("%.5f",v[1])}
+            %td== #{@top_words[v[0].to_i].join(", ")}
                 
     %a{:href => "/JSMN"}top

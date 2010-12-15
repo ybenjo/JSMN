@@ -10,6 +10,9 @@ module AccessDB
   @journal_port = 9999
   @bow_port = 10000
   @mutual_info_port = 9997
+
+  #関連単語出力
+  @lim_size = 5
   
   def self.get_word_id(word)
     rdb = RDBTBL::new
@@ -115,22 +118,40 @@ module AccessDB
   def self.set_top3_mutual_info(bow, journal_list)
     rdb = RDB::new
     flag = rdb.open(@localhost, @mutual_info_port)
+    rase MutualInformationDatabaseDownError if !flag
 
     ret = Hash.new
     
     journal_list.each do |j_id|
       tmp = Hash.new
+      p rdb.get(j_id)
       m_info = Marshal.load(rdb.get(j_id))
-      p m_info
       bow.each_key do |w_id|
         tmp[w_id] = m_info[w_id].to_i
       end
-      ret[j_id] = []
-      tmp.to_a.sort{|a,b|b[1] <=> a[1]}[0..2].each{|e| ret[j_id].push e[0]}
+      ret[j_id] = Array.new
+      tmp.to_a.sort{|a,b|b[1] <=> a[1]}[0..@lim_size - 1].each{|e| ret[j_id].push e[0]}
     end
-    return ret
     rdb.close
+    return ret
   end
+
+
+  def self.get_word_ids_string(word_ids_ary)
+    rdb = RDBTBL::new
+    rdb.open(@localhost, @word_port)
+    ret = [ ]
+
+    word_ids_ary.each do |w_id|
+      qry = RDBQRY::new(rdb)
+      qry.addcond("id", RDBQRY::QCSTREQ, w_id.to_s)
+      ret.push qry.search().first
+    end
+    rdb.close
+    return ret
+  end
+
+  
 end
 
 if $0 == __FILE__

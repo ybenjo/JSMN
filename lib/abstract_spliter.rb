@@ -52,7 +52,6 @@ class AbstractSpliter
       tmp = []
       @bag_of_words = AccessDB.convert_bag_of_words_to_id(@bag_of_words)
       @bag_of_words.each_pair do |k, v|
-#        value = AccessDB.get_word_id(k)
         tmp.push "#{k}:#{v}"
       end
       raise ShortAbstractError if tmp.size < 2
