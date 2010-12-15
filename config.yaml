@@ -3,5 +3,5 @@ simhash_path: /Users/y_benjo/TinySimHash
 fserver_port: 90001
 hserver_port: 90002
 k: 3
-l: 20
+l: 10
 output_log: /Users/y_benjo/JSMN/data/db/var/log_simhash

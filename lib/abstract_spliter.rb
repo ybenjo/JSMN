@@ -50,9 +50,10 @@ class AbstractSpliter
   def write_bag_of_words
     open("#{DATA_PATH}/jsmn_#{@abst_md5}", "w"){|f|
       tmp = []
+      @bag_of_words = AccessDB.convert_bag_of_words_to_id(@bag_of_words)
       @bag_of_words.each_pair do |k, v|
-        value = AccessDB.get_word_id(k)
-        tmp.push "#{value}:#{v}" if !value.nil?
+#        value = AccessDB.get_word_id(k)
+        tmp.push "#{k}:#{v}"
       end
       raise ShortAbstractError if tmp.size < 2
       f.puts tmp.join(" ")
