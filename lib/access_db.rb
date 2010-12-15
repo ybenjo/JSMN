@@ -6,7 +6,8 @@ include TokyoTyrant
 
 module AccessDB
   @localhost = "127.0.0.1"
-  @word_port = 9998
+  @word_id_port = 9998
+  @id_word_port = 9996
   @journal_port = 9999
   @bow_port = 10000
   @mutual_info_port = 9997
@@ -15,15 +16,11 @@ module AccessDB
   @lim_size = 5
   
   def self.get_word_id(word)
-    rdb = RDBTBL::new
-    flag = rdb.open(@localhost, @word_port)
+    rdb = RDB::new
+    flag = rdb.open(@localhost, @word_id_port)
     raise WordDatabaseDownError if !flag
 
-    tmp_v = rdb.get(word)
-    id = nil
-    if !tmp_v.nil?
-      id = tmp_v["id"]
-    end
+    id = rdb.get(word)
     rdb.close
     return id
   end
@@ -49,11 +46,9 @@ module AccessDB
   end
 
   def self.get_word_string(w_id)
-    rdb = RDBTBL::new
-    rdb.open(@localhost, @word_port)
-    qry = RDBQRY::new(rdb)
-    qry.addcond("id", RDBQRY::QCSTREQ, w_id.to_s)
-    ret_str = qry.search().first
+    rdb = RDB::new
+    rdb.open(@localhost, @id_word_port)
+    ret_str = rdb.get(w_id)
     rdb.close
     return ret_str
   end
@@ -70,7 +65,7 @@ module AccessDB
 
   def self.word_db_active?
     rdb = RDBTBL::new
-    flag = rdb.open(@localhost, @word_port)
+    flag = rdb.open(@localhost, @word_id_port)
     rdb.close
     return flag
   end
@@ -81,7 +76,14 @@ module AccessDB
     rdb.close
     return flag
   end
-  
+
+  def self.id_word_db_active?
+    rdb = RDBTBL::new
+    flag = rdb.open(@localhost, @id_word_port)
+    rdb.close
+    return flag
+  end
+
   def self.mutual_info_db_active?
     rdb = RDBTBL::new
     flag = rdb.open(@localhost, @mutual_info_port)
@@ -91,6 +93,7 @@ module AccessDB
   
   def self.active?
     raise WordDatabaseDownError if !word_db_active?
+    raise IDWordDatabaseDownError if !id_word_db_active?
     raise JournalDatabaseDownError if !journal_db_active?
     raise MutualInformationDatabaseDownError if !mutual_info_db_active?
     return true
@@ -98,14 +101,19 @@ module AccessDB
 
   def self.convert_bag_of_words_to_id(bow)
     ret = Hash.new{0}
+
+    rdb = RDB::new
+    flag = rdb.open(@localhost, @word_id_port)
+    raise WordDatabaseDownError if !flag
+
     bow.each_pair do |w, count|
-      id = get_word_id(w)
+      id = rdb.get(w)
       ret[id.to_i] = count if !id.nil?
     end
+    rdb.close
     return ret
   end
   
-
   
   #input
   #bow => {w_id => count, w_id => count, ...}
@@ -137,20 +145,21 @@ module AccessDB
   end
 
 
+  # input [w_id, w_id, w_id...,]
+  # output [string, string, string]
   def self.get_word_ids_string(word_ids_ary)
-    rdb = RDBTBL::new
-    rdb.open(@localhost, @word_port)
+    rdb = RDB::new
+    flag = rdb.open(@localhost, @id_word_port)
+    raise IDWordDatabaseDownError if !flag
+
     ret = [ ]
 
     word_ids_ary.each do |w_id|
-      qry = RDBQRY::new(rdb)
-      qry.addcond("id", RDBQRY::QCSTREQ, w_id.to_s)
-      ret.push qry.search().first
+      ret.push rdb.get(w_id)
     end
     rdb.close
     return ret
   end
-
   
 end
 

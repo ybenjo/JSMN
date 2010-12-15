@@ -15,7 +15,7 @@ end
 class WordDatabaseDownError < StandardError
   def initialize(*args)
     if args.empty?
-      super("Sorry, word database is down.")
+      super("Sorry, {:word => :id} database is down.")
     else
       super(*args)
     end
@@ -46,6 +46,16 @@ class MutualInformationDatabaseDownError < StandardError
   def initialize(*args)
     if args.empty?
       super("Sorry, mutual infomation database is down.")
+    else
+      super(*args)
+    end
+  end
+end
+
+class IDWordDatabaseDownError < StandardError
+  def initialize(*args)
+    if args.empty?
+      super("Sorry, {:id => :word} database is down.")
     else
       super(*args)
     end

@@ -56,9 +56,9 @@ post '/result' do
     end
 
     @top_words = AccessDB.set_top3_mutual_info(@abst.bag_of_words, @journals)
-#     @top_words.each_key do |key|
-#       @top_words[key] = AccessDB.get_word_ids_string(@top_words[key])
-#     end
+    @top_words.each_key do |key|
+      @top_words[key] = AccessDB.get_word_ids_string(@top_words[key])
+    end
     
     @abst.delete_bag_of_words
     
