@@ -5,3 +5,4 @@ hserver_port: 90002
 k: 3
 l: 10
 output_log: /Users/y_benjo/JSMN/data/db/var/log_simhash
+related_size: 5

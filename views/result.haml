@@ -9,11 +9,13 @@
 
   %body
     %h1.title Result
+    %h2== Common distinctive words
+    %p== #{@intersections.join(", ")}
     %table
       %tr
         %th Journal title
         %th Similarity
-        %th Specific words
+        %th Distinctive words
         - @similarity.each do |v|
           %tr
             %td== #{@content_title[v[0]]}

@@ -11,9 +11,6 @@ module AccessDB
   @journal_port = 9999
   @bow_port = 10000
   @mutual_info_port = 9997
-
-  #関連単語出力
-  @lim_size = 5
   
   def self.get_word_id(word)
     rdb = RDB::new
@@ -120,28 +117,39 @@ module AccessDB
   #journal_list => [j_id, j_id, j_id, ...]
 
   #output
-  #ret = {j_id => [word, word, word], j_id => [word, word, word] }
-  #ジャーナルごとに相互情報量のランキングを取得し、
-  #相互情報量が大きい順　かつ bowに含まれた単語を返す
-  def self.set_top3_mutual_info(bow, journal_list)
+  #ret = {j_id => [word_id, word_id, word_id, ..., ], j_id => [word_id, word_id, word_id, ...] }
+  #ジャーナルごとに相互情報量が高い単語idをN件取得し、次のものを返す
+  # 1. 全ジャーナルが共通して持つ単語
+  # 2. それぞれのジャーナルが持つ単語から1.を除いたもの 
+  def self.set_related_word_ids(bow, journal_list, show_size = 5)
     rdb = RDB::new
     flag = rdb.open(@localhost, @mutual_info_port)
     rase MutualInformationDatabaseDownError if !flag
 
     ret = Hash.new
+    j_ids = Hash.new
+
+    word_count = Hash.new{|h, k|h[k] = 0}
     
-    journal_list.each do |j_id|
-      tmp = Hash.new
-      p rdb.get(j_id)
+    intersections = [ ]
+    
+    journal_list.each_with_index do |j_id, i|
+      j_ids[j_id] = Array.new
       m_info = Marshal.load(rdb.get(j_id))
-      bow.each_key do |w_id|
-        tmp[w_id] = m_info[w_id].to_i
+      (bow.keys & m_info.keys.map{|e|e.to_i}).each do |w_id|
+        j_ids[j_id].push w_id
+        word_count[w_id] += 1
       end
-      ret[j_id] = Array.new
-      tmp.to_a.sort{|a,b|b[1] <=> a[1]}[0..@lim_size - 1].each{|e| ret[j_id].push e[0]}
     end
+
+    word_count.to_a.sort{|a, b|b[1] <=> a[1]}[0...show_size].each{|e|intersections.push e[0]}
+
+    j_ids.each_pair do |j_id, ids|
+      ret[j_id] = ((ids) - (intersections))[0...show_size]
+    end
+    
     rdb.close
-    return ret
+    return intersections[0...show_size], ret
   end
 
 

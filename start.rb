@@ -55,10 +55,12 @@ post '/result' do
       @journals.push e[0].to_i
     end
 
-    @top_words = AccessDB.set_top3_mutual_info(@abst.bag_of_words, @journals)
+    @intersections, @top_words = AccessDB.set_related_word_ids(@abst.bag_of_words, @journals, @config["related_size"])
     @top_words.each_key do |key|
       @top_words[key] = AccessDB.get_word_ids_string(@top_words[key])
     end
+
+    @intersections = AccessDB.get_word_ids_string(@intersections)
     
     @abst.delete_bag_of_words
     
