@@ -16,10 +16,12 @@
         %th Journal title
         %th Similarity
         %th Distinctive words
+        %th Quasi impact factor
         - @similarity.each do |v|
           %tr
             %td== #{@content_title[v[0]]}
             %td== #{sprintf("%.5f",v[1])}
             %td== #{@top_words[v[0].to_i].join(", ")}
+            %td== #{@ifs[@content_title[v[0]]]}
                 
     %a{:href => "/JSMN"}top

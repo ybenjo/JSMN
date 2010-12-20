@@ -6,11 +6,14 @@ include TokyoTyrant
 
 module AccessDB
   @localhost = "127.0.0.1"
+  @journal_port = 9999
+  @mutual_info_port = 9997
   @word_id_port = 9998
   @id_word_port = 9996
-  @journal_port = 9999
+  @if_port = 9995
+
   @bow_port = 10000
-  @mutual_info_port = 9997
+
   
   def self.get_word_id(word)
     rdb = RDB::new
@@ -87,12 +90,21 @@ module AccessDB
     rdb.close
     return flag
   end
+
+  def self.if_db_active?
+    rdb = RDB::new
+    flag = rdb.open(@localhost, @if_port)
+    rdb.close
+    return flag
+  end
+
   
   def self.active?
     raise WordDatabaseDownError if !word_db_active?
     raise IDWordDatabaseDownError if !id_word_db_active?
     raise JournalDatabaseDownError if !journal_db_active?
     raise MutualInformationDatabaseDownError if !mutual_info_db_active?
+    raise IFDatabaseDownError if !if_db_active?
     return true
   end
 
@@ -164,6 +176,29 @@ module AccessDB
 
     word_ids_ary.each do |w_id|
       ret.push rdb.get(w_id)
+    end
+    rdb.close
+    return ret
+  end
+
+  #タイトル集合を受け取ってタイトル => if を返す
+  #nil だった場合はハイフンを返す
+  def get_journal_impact_factor(journal_titles)
+    rdb = RDB::new
+    flag = rdb.open(@localhost, @if_port)
+    if !flag
+      rdb.close
+      raise IFDatabaseDownError
+    end
+    
+    ret = Hash.new
+    journal_titles.each do |title|
+      value = (rdb.get(title))
+      if value.nil?
+        ret[title] = "-"
+      else
+        ret[title] = value.to_f
+      end
     end
     rdb.close
     return ret

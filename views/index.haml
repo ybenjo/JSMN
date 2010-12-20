@@ -17,9 +17,11 @@
     %h2 About
     %p 入力された英文abstractから類似したjournalを表示します。journal投稿の参考や資料探しにご利用ください。
     %p 推薦には2005年以降のPubMedのデータを用いています
+    %p 表示しているインパクトファクターはPubMedのデータから2008年度のものを計算しています。PubMedのデータを用いているため、本来のインパクトファクターとは異なる値が表示されている可能性があります。
 
     %h3 更新履歴
     %ul
+      %li 2010年12月20日 PubMedのデータから算出した擬似インパクトファクターを出力
       %li 2010年12月18日 公開
 
   
@@ -30,5 +32,7 @@
       %li
         %a{:href => "http://dbcls.rois.ac.jp"}Database Center for Life Science
       %li
-        %a{:href => "http://twitter.com/y_benjo"}Twitter : @y_benjo
+        %a{:href => "http://d.hatena.ne.jp/repose/20101218/1292603002"}簡単な解説
+      %li
+        %a{:href => "http://twitter.com/y_benjo"}実装 : @y_benjo
       

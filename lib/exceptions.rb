@@ -62,6 +62,15 @@ class IDWordDatabaseDownError < StandardError
   end
 end
 
+class IFDatabaseDownError < StandardError
+  def initialize(*args)
+    if args.empty?
+      super("Sorry, impact factor database is down.")
+    else
+      super(*args)
+    end
+  end
+end
 
 class UnexpectedError < StandardError
   def initialize(*args)

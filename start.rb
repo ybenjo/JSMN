@@ -26,6 +26,9 @@ post '/result' do
   begin
     @config = YAML.load_file("./config.yaml")
     @abst = AbstractSpliter.new(params[:abstract])
+
+    working(@abst.abst)
+    
     @abst.filter_alphabet
     @abst.set_bag_of_words
     @abst.write_bag_of_words
@@ -37,19 +40,26 @@ post '/result' do
     system "#{@config["simhash_path"]}/simhash --q /tmp/jsmn_#{@abst.abst_md5} \\
     --fserver localhost:#{@config["fserver_port"]} \\
     --hserver localhost:#{@config["hserver_port"]} \\
-    --fast --normal --limit #{@config["l"]} -k #{@config["k"]} >> #{@config["output_log"]}"
+    --fast --normal --limit #{@config["l"]} -k #{@config["k"]}"
 
     raise UnexpectedError if !File.exist?("/tmp/jsmn_#{@abst.abst_md5}.out")
     
+    @titles = []
     @similarity = []
     @content_title = Hash.new{ }
     open("/tmp/jsmn_#{@abst.abst_md5}.out"){|f|
       f.each{|l|
         id, score = l.chomp.split(",")
         @similarity.push [id.to_s, score.to_f]
-        @content_title[id] = AccessDB.get_journal_string(id)
+        title = AccessDB.get_journal_string(id)
+        @content_title[id] = title
+        @titles.push title
       }
     }
+
+
+    #インパクトファクター所得
+    @ifs = AccessDB.get_journal_impact_factor(@titles)
 
     #特徴語出力用
     @journals = [ ]
@@ -68,7 +78,7 @@ post '/result' do
     
     haml :result
   rescue => @error_message
-    error(@error_message.backtrace)
+    notice(@error_message.inspect)
     @abst.delete_bag_of_words
     haml :error
   end
