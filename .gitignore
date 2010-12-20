@@ -1,0 +1,6 @@
+*.o
+data
+sna
+*tmp*
+*result*
+lib/supervision.rb

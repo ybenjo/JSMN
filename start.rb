@@ -7,13 +7,13 @@ require "open-uri"
 require "yaml"
 require "./lib/abstract_spliter.rb"
 require "./lib/access_db.rb"
-
+require "./lib/supervision.rb"
 
 helpers do
   include Rack::Utils; alias_method :h, :escape_html
 end
 
-get '/stylesheet.sass' do
+get 'stylesheet.sass' do
   content_type 'text/css', :charset => 'utf-8'
   sass :stylesheet
 end
@@ -29,6 +29,8 @@ post '/result' do
     @abst.filter_alphabet
     @abst.set_bag_of_words
     @abst.write_bag_of_words
+
+    working(@abst.filterd_abst)
 
     raise NoSimHashError if !File.exist?("#{@config["simhash_path"]}/simhash")
     
@@ -66,6 +68,7 @@ post '/result' do
     
     haml :result
   rescue => @error_message
+    error(@error_message.backtrace)
     @abst.delete_bag_of_words
     haml :error
   end
