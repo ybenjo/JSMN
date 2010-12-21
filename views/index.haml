@@ -9,15 +9,16 @@
 
   %body
     %h1.title Journal Suggstion using MedliNe (JSMN)
-    %p Input your paper's abstract or keywords (more than 2 words)
+    %p 論文のアブストラクトかキーワードを英語で入力して下さい（少ないと検索が失敗する場合があります）
     %form{:action => "/JSMN/result", :method => "POST"}
       %textarea{:type => "textarea", :name => "abstract", :cols => "60", :rows => "6"}
       %input{:type => "submit", :value => "submit"}
           
     %h2 About
-    %p 入力された英文abstractから類似したjournalを表示します。journal投稿の参考や資料探しにご利用ください。
-    %p 推薦には2005年以降のPubMedのデータを用いています
-    %p 表示しているインパクトファクターはPubMedのデータから2008年度のものを計算しています。PubMedのデータを用いているため、本来のインパクトファクターとは異なる値が表示されている可能性があります。
+    %p 入力された英文アブストラクト（またはキーワード）から類似したジャーナルを表示します。ジャーナル投稿の参考や資料探しにご利用ください。
+    %p 推薦には2005年以降のPubMedのデータを用いています。
+    %p 表示しているインパクトファクターはPubMedのデータから2009年度のものを計算しています。
+    %p PubMedのデータを用いているため、本来のインパクトファクターとは異なる値が表示されている可能性があります。
 
     %h3 更新履歴
     %ul

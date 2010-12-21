@@ -27,13 +27,13 @@ post '/result' do
     @config = YAML.load_file("./config.yaml")
     @abst = AbstractSpliter.new(params[:abstract])
 
-    working(@abst.abst)
+    working(@abst.abst[0...100])
     
     @abst.filter_alphabet
     @abst.set_bag_of_words
     @abst.write_bag_of_words
 
-    working(@abst.filterd_abst)
+    working(@abst.bag_of_words)
 
     raise NoSimHashError if !File.exist?("#{@config["simhash_path"]}/simhash")
     
@@ -78,6 +78,7 @@ post '/result' do
     
     haml :result
   rescue => @error_message
+    notice(@abst.abst)
     notice(@error_message.inspect)
     @abst.delete_bag_of_words
     haml :error
