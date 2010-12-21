@@ -33,7 +33,7 @@ post '/result' do
     @abst.set_bag_of_words
     @abst.write_bag_of_words
 
-    working(@abst.bag_of_words)
+    working(@abst.bag_of_words.to_a.map{|e|e.join(":")}.join(" ")[0...100])
 
     raise NoSimHashError if !File.exist?("#{@config["simhash_path"]}/simhash")
     
@@ -58,7 +58,7 @@ post '/result' do
     }
 
 
-    #インパクトファクター所得
+    #インパクトファクター取得
     @ifs = AccessDB.get_journal_impact_factor(@titles)
 
     #特徴語出力用
