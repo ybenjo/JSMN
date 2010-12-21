@@ -20,8 +20,8 @@
         - @similarity.each do |v|
           %tr
             %td== #{@content_title[v[0]]}
-            %td== #{sprintf("%.5f",v[1])}
+            %td== #{sprintf("%.4f", v[1])}
             %td== #{@top_words[v[0].to_i].join(", ")}
-            %td== #{@ifs[@content_title[v[0]]]}
+            %td== #{@ifs[@content_title[v[0]]].class == Float ? sprintf("%.3f", @ifs[@content_title[v[0]]]) : "-"}
                 
     %a{:href => "/JSMN"}top
