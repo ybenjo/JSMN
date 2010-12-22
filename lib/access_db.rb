@@ -1,125 +1,109 @@
 # -*- coding: utf-8 -*-
 require 'tokyocabinet'
 require 'tokyotyrant'
+require 'yaml'
 require "#{File::expand_path(File::dirname(__FILE__))}/exceptions.rb"
 include TokyoTyrant
 
-module AccessDB
-  @localhost = "127.0.0.1"
-  @journal_port = 9999
-  @mutual_info_port = 9997
-  @word_id_port = 9998
-  @id_word_port = 9996
-  @if_port = 9995
-
-  @bow_port = 10000
-
+class AccessDB
+  def initialize(config_file)
+    @rdb = RDB::new
+    @rdbtbl = RDBTBL::new
+    
+    config = YAML.load_file(config_file)
+    @localhost = config["localhost"]
+    @journal_port = config["journal_port"]
+    @mutual_info_port = config["mutual_info_port"]
+    @word_id_port = config["word_id_port"]
+    @id_word_port = config["id_word_port"]
+    @impact_factor_port = config["impact_factor_port"]
+  end
   
-  def self.get_word_id(word)
-    rdb = RDB::new
-    flag = rdb.open(@localhost, @word_id_port)
+  def get_word_id(word)
+    flag = @rdb.open(@localhost, @word_id_port)
     raise WordDatabaseDownError if !flag
 
-    id = rdb.get(word)
-    rdb.close
+    id = @rdb.get(word)
+    @rdb.close
     return id
   end
   
-  def self.get_journal_id(journal)
-    rdb = RDBTBL::new
-    flag = rdb.open(@localhost, @journal_port)
+  def get_journal_id(journal)
+    flag = @rdbtbl.open(@localhost, @journal_port)
     raise JournalDatabaseDownError if !flag
     
-    id = rdb.get(journal)["id"]
-    rdb.close
+    id = @rdbtbl.get(journal)["id"]
+    @rdbtbl.close
     return id
   end
 
-  def self.get_bow(j_id)
-    rdb = RDB::new
-    flag = rdb.open(@localhost, @bow_port)
-    raise BOWDatabaseDownError if !flag
-    
-    bow = Marshal.load(rdb.get(j_id))
-    rdb.close
-    return bow
-  end
-
-  def self.get_word_string(w_id)
-    rdb = RDB::new
-    rdb.open(@localhost, @id_word_port)
-    ret_str = rdb.get(w_id)
-    rdb.close
+  def get_word_string(w_id)
+    @rdb.open(@localhost, @id_word_port)
+    ret_str = @rdb.get(w_id)
+    @rdb.close
     return ret_str
   end
 
-  def self.get_journal_string(j_id)
-    rdb = RDBTBL::new
-    rdb.open(@localhost, @journal_port)
-    qry = RDBQRY::new(rdb)
+  def get_journal_string(j_id)
+    @rdbtbl.open(@localhost, @journal_port)
+    qry = RDBQRY::new(@rdbtbl)
     qry.addcond("id", RDBQRY::QCSTREQ, j_id.to_s)
     ret_str = qry.search().first
-    rdb.close
+    @rdbtbl.close
     return ret_str
   end
 
-  def self.word_db_active?
-    rdb = RDBTBL::new
-    flag = rdb.open(@localhost, @word_id_port)
-    rdb.close
+  def word_id_db_active?
+    flag = @rdb.open(@localhost, @word_id_port)
+    @rdb.close
     return flag
   end
   
-  def self.journal_db_active?
-    rdb = RDBTBL::new
-    flag = rdb.open(@localhost, @journal_port)
-    rdb.close
+  def journal_db_active?
+    flag = @rdbtbl.open(@localhost, @journal_port)
+    @rdbtbl.close
     return flag
   end
 
-  def self.id_word_db_active?
-    rdb = RDBTBL::new
-    flag = rdb.open(@localhost, @id_word_port)
-    rdb.close
+  def id_word_db_active?
+    flag = @rdb.open(@localhost, @id_word_port)
+    @rdb.close
     return flag
   end
 
-  def self.mutual_info_db_active?
-    rdb = RDBTBL::new
-    flag = rdb.open(@localhost, @mutual_info_port)
-    rdb.close
+  def mutual_info_db_active?
+    flag = @rdb.open(@localhost, @mutual_info_port)
+    @rdb.close
     return flag
   end
 
-  def self.if_db_active?
-    rdb = RDB::new
-    flag = rdb.open(@localhost, @if_port)
-    rdb.close
+  def impact_factor_db_active?
+    flag = @rdb.open(@localhost, @impact_factor_port)
+    @rdb.close
     return flag
   end
 
   
-  def self.active?
-    raise WordDatabaseDownError if !word_db_active?
+  def active?
+    raise WordIDDatabaseDownError if !word_id_db_active?
     raise IDWordDatabaseDownError if !id_word_db_active?
     raise JournalDatabaseDownError if !journal_db_active?
     raise MutualInformationDatabaseDownError if !mutual_info_db_active?
-    raise IFDatabaseDownError if !if_db_active?
+    raise ImpactFactorDatabaseDownError if !impact_factor_db_active?
     return true
   end
 
-  def self.convert_bag_of_words_to_id(bow)
+  def convert_bag_of_words_to_id(bow)
     ret = Hash.new{0}
 
-    rdb = RDB::new
-    flag = rdb.open(@localhost, @word_id_port)
+    flag = @rdb.open(@localhost, @word_id_port)
     raise WordDatabaseDownError if !flag
 
     bow.each_pair do |w, count|
-      id = rdb.get(w)
+      id = @rdb.get(w)
       ret[id.to_i] = count if !id.nil?
     end
-    rdb.close
+    @rdb.close
     return ret
   end
   
@@ -133,10 +117,9 @@ module AccessDB
   #ジャーナルごとに相互情報量が高い単語idをN件取得し、次のものを返す
   # 1. 全ジャーナルが共通して持つ単語
   # 2. それぞれのジャーナルが持つ単語から1.を除いたもの 
-  def self.set_related_word_ids(bow, journal_list, show_size = 5)
-    rdb = RDB::new
-    flag = rdb.open(@localhost, @mutual_info_port)
-    rase MutualInformationDatabaseDownError if !flag
+  def set_related_word_ids(bow, journal_list, show_size = 5)
+    flag = @rdb.open(@localhost, @mutual_info_port)
+    raise MutualInformationDatabaseDownError if !flag
 
     ret = Hash.new
     j_ids = Hash.new
@@ -147,7 +130,7 @@ module AccessDB
     
     journal_list.each_with_index do |j_id, i|
       j_ids[j_id] = Array.new
-      m_info = Marshal.load(rdb.get(j_id))
+      m_info = Marshal.load(@rdb.get(j_id))
       (bow.keys & m_info.keys.map{|e|e.to_i}).each do |w_id|
         j_ids[j_id].push w_id
         word_count[w_id] += 1
@@ -160,52 +143,49 @@ module AccessDB
       ret[j_id] = ((ids) - (intersections))[0...show_size]
     end
     
-    rdb.close
+    @rdb.close
     return intersections[0...show_size], ret
   end
 
 
   # input [w_id, w_id, w_id...,]
   # output [string, string, string]
-  def self.get_word_ids_string(word_ids_ary)
-    rdb = RDB::new
-    flag = rdb.open(@localhost, @id_word_port)
+  def get_word_ids_string(word_ids_ary)
+    flag = @rdb.open(@localhost, @id_word_port)
     raise IDWordDatabaseDownError if !flag
 
     ret = [ ]
 
     word_ids_ary.each do |w_id|
-      ret.push rdb.get(w_id)
+      ret.push @rdb.get(w_id)
     end
-    rdb.close
+    @rdb.close
     return ret
   end
 
   #タイトル集合を受け取ってタイトル => if を返す
   #nil だった場合はハイフンを返す
   def get_journal_impact_factor(journal_titles)
-    rdb = RDB::new
-    flag = rdb.open(@localhost, @if_port)
+    flag = @rdb.open(@localhost, @impact_factor_port)
     if !flag
-      rdb.close
-      raise IFDatabaseDownError
+      @rdb.close
+      raise ImpactFactorDatabaseDownError
     end
     
     ret = Hash.new
     journal_titles.each do |title|
-      value = (rdb.get(title))
+      value = (@rdb.get(title))
       if value.nil?
         ret[title] = "-"
       else
         ret[title] = value.to_f
       end
     end
-    rdb.close
+    @rdb.close
     return ret
   end
   
 end
 
 if $0 == __FILE__
-  include AccessDB
 end

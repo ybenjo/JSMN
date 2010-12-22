@@ -12,7 +12,7 @@ class ShortAbstractError < StandardError
 end
 
 #DB
-class WordDatabaseDownError < StandardError
+class WordIDDatabaseDownError < StandardError
   def initialize(*args)
     if args.empty?
       super("Sorry, {:word => :id} database is down.")
@@ -32,15 +32,6 @@ class JournalDatabaseDownError < StandardError
   end
 end
 
-class BOWDatabaseDownError < StandardError
-  def initialize(*args)
-    if args.empty?
-      super("Sorry, bag-of-word database is down.")
-    else
-      super(*args)
-    end
-  end
-end
 
 class MutualInformationDatabaseDownError < StandardError
   def initialize(*args)
@@ -62,7 +53,7 @@ class IDWordDatabaseDownError < StandardError
   end
 end
 
-class IFDatabaseDownError < StandardError
+class ImpactFactorDatabaseDownError < StandardError
   def initialize(*args)
     if args.empty?
       super("Sorry, impact factor database is down.")

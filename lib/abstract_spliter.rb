@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 require "digest/md5"
 require "#{File::expand_path(File::dirname(__FILE__))}/exceptions.rb"
-require "#{File::expand_path(File::dirname(__FILE__))}/access_db.rb"
-include AccessDB
 
 $KCODE = "u"
 DATA_PATH = "/tmp"
@@ -47,10 +45,10 @@ class AbstractSpliter
 
   end
 
-  def write_bag_of_words
+  def write_bag_of_words(db)
     open("#{DATA_PATH}/jsmn_#{@abst_md5}", "w"){|f|
       tmp = []
-      @bag_of_words = AccessDB.convert_bag_of_words_to_id(@bag_of_words)
+      @bag_of_words = db.convert_bag_of_words_to_id(@bag_of_words)
       @bag_of_words.each_pair do |k, v|
         tmp.push "#{k}:#{v}"
       end

@@ -25,13 +25,15 @@ end
 post '/result' do
   begin
     @config = YAML.load_file("./config.yaml")
+    @db = AccessDB.new("./config.yaml")
     @abst = AbstractSpliter.new(params[:abstract])
-
+    @db.active?
+    
     working(@abst.abst[0...100])
     
     @abst.filter_alphabet
     @abst.set_bag_of_words
-    @abst.write_bag_of_words
+    @abst.write_bag_of_words(@db)
 
     working(@abst.bag_of_words.to_a.map{|e|e.join(":")}.join(" ")[0...100])
 
@@ -51,7 +53,7 @@ post '/result' do
       f.each{|l|
         id, score = l.chomp.split(",")
         @similarity.push [id.to_s, score.to_f]
-        title = AccessDB.get_journal_string(id)
+        title = @db.get_journal_string(id)
         @content_title[id] = title
         @titles.push title
       }
@@ -59,7 +61,7 @@ post '/result' do
 
 
     #インパクトファクター取得
-    @ifs = AccessDB.get_journal_impact_factor(@titles)
+    @ifs = @db.get_journal_impact_factor(@titles)
 
     #特徴語出力用
     @journals = [ ]
@@ -67,19 +69,19 @@ post '/result' do
       @journals.push e[0].to_i
     end
 
-    @intersections, @top_words = AccessDB.set_related_word_ids(@abst.bag_of_words, @journals, @config["related_size"])
+    @intersections, @top_words = @db.set_related_word_ids(@abst.bag_of_words, @journals, @config["related_size"])
     @top_words.each_key do |key|
-      @top_words[key] = AccessDB.get_word_ids_string(@top_words[key])
+      @top_words[key] = @db.get_word_ids_string(@top_words[key])
     end
 
-    @intersections = AccessDB.get_word_ids_string(@intersections)
+    @intersections = @db.get_word_ids_string(@intersections)
     
     @abst.delete_bag_of_words
     
     haml :result
   rescue => @error_message
     notice(@abst.abst)
-    notice(@error_message.inspect)
+    notice(@error_message.backtrace)
     @abst.delete_bag_of_words
     haml :error
   end

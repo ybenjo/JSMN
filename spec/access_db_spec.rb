@@ -3,43 +3,43 @@ require "../lib/access_db.rb"
 
 describe AccessDB do
   before do
-    include AccessDB
+    @db = AccessDB.new("../config.yaml")
+    @db.stub!(:word_id_db_active?).and_return(true)
+    @db.stub!(:journal_db_active?).and_return(true)
+    @db.stub!(:id_word_db_active?).and_return(true)
+    @db.stub!(:mutual_info_db_active?).and_return(true)
+    @db.stub!(:impact_factor_db_active?).and_return(true)
   end
   
   describe ".active?" do
     it "はdbが起動している場合はtrueを返す" do
-      AccessDB.stub!(:word_db_active?).and_return(true)
-      AccessDB.stub!(:journal_db_active?).and_return(true)
-      AccessDB.active?.should be_true
+      @db.active?.should be_true
     end
     
-    it "は単語dbが起動していない場合 WordDatabaseDownError を投げる" do
-      AccessDB.stub!(:word_db_active?).and_return(false)
-      AccessDB.stub!(:journal_db_active?).and_return(true)
-      lambda{AccessDB.active?}.should raise_error(WordDatabaseDownError)
+    it "は単語iddbが起動していない場合 WordDatabaseDownError を投げる" do
+      @db.stub!(:word_id_db_active?).and_return(false)
+      lambda{@db.active?}.should raise_error(WordIDDatabaseDownError)
     end
 
     it "はジャーナルdbが起動していない場合 JournalDatabaseDownError を投げる" do
-      AccessDB.stub!(:word_db_active?).and_return(true)
-      AccessDB.stub!(:journal_db_active?).and_return(false)
-      lambda{AccessDB.active?}.should raise_error(JournalDatabaseDownError)
-    end
-  end
-
-  describe "convert_bag_of_words_to_id" do
-    before do
-      AccessDB.should_receive(:get_word_id).any_number_of_times.with("rat").and_return(1)
-      AccessDB.should_receive(:get_word_id).any_number_of_times.with("mouse").and_return(2)
-      AccessDB.should_receive(:get_word_id).any_number_of_times.with("mickey").and_return(nil)
+      @db.stub!(:journal_db_active?).and_return(false)
+      lambda{@db.active?}.should raise_error(JournalDatabaseDownError)
     end
     
-    it "はhashのbag_of_wordsを受け取ってidに変換する" do
-      AccessDB.convert_bag_of_words_to_id({"rat" => 1, "mouse" => 2}).should == {1 => 1, 2 => 2}
+    it "はid単語dbが起動していない場合 IDWordDatabaseDownError を投げる" do
+      @db.stub!(:id_word_db_active?).and_return(false)
+      lambda{@db.active?}.should raise_error(IDWordDatabaseDownError)
     end
 
-    it "はdbに存在しない文字列については返さない" do
-      AccessDB.convert_bag_of_words_to_id({"rat" => 1, "mouse" => 2, "mickey" => 3}).should == {1 => 1, 2 => 2}
+    it "は総合情報量dbが起動していない場合 MutualInfomationDatabaseDownError を投げる" do
+      @db.stub!(:mutual_info_db_active?).and_return(false)
+      lambda{@db.active?}.should raise_error(MutualInformationDatabaseDownError)
     end
+
+    it "はインパクトファクターdbが起動していない場合 ImpactFactorDatabaseDownError を投げる" do
+      @db.stub!(:impact_factor_db_active?).and_return(false)
+      lambda{@db.active?}.should raise_error(ImpactFactorDatabaseDownError)
+    end
+
   end
-  
 end
