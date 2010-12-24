@@ -1,8 +1,32 @@
+# -*- coding: utf-8 -*-
 #usage
 #ruby ./impact_factor.rb #{if.txt} #{year}
 
+require "tokyotyrant"
+require "optparse"
+require ("#{File.expand_path(File.dirname(__FILE__))}/exception.rb")
+include TokyoTyrant
 
-target_year = ARGV[1].to_i
+target_year = Time.now.year - 1
+file = "/tmp/tmp_impact_factor.txt"
+if file.nil?
+  puts "Please select file path! (-f [path])"
+  exit(1)
+elsif !File.exist?(file)
+  puts "File #{OPTS[:file]} not found!"
+  exit(1)
+end
+
+#tokyotyrant周り
+config = YAML.load_file("#{File.expand_path(File.dirname(__FILE__))}/../../config.yaml")
+localhost = config[:localhost]
+port = config[:impact_factor_port]
+
+rdb = RDB::new
+flag = rdb.open(localhost, port)
+if !flag
+  raise ImpactFactorDatabaseDownError
+end
 
 # :file format => pmid \t year \t journal title \t pmid:pmid:pmid...
 sum = Hash.new{|h,k|h[k] = 0.0}
@@ -14,7 +38,7 @@ pmid_year = Hash.new
 
 cited = Hash.new{|h, k|h[k] = 0}
 
-open(ARGV[0]){|f|
+open(file){|f|
   f.each do |l|
     pmid, year, j_title, cites = l.chomp.split("\t")
     
@@ -48,19 +72,9 @@ end
 impact_factor = Hash.new
 c.each_pair do |j_title, score|
   next if sum[j_title] == 0.0
-  impact_factor[j_title] = score/sum[j_title]
+  # impact_factor[j_title] = score/sum[j_title]
+  rdb.put(j_title, score/sum[j_title])
 end
 
-open("#{ARGV[0]}#{ARGV[1]}.out", "w"){|f|
-  impact_factor.to_a.sort{|a,b|b[1] <=> a[1]}.each do |e|
-    f.puts e.join("\t")
-  end
-}
 
-
-open("#{ARGV[0]}#{ARGV[1]}.cited", "w"){|f|
-  cited.to_a.sort{|a, b|b[1] <=> a[1]}[0..100].each do |e|
-    id , year= e[0].to_a.flatten
-    f.puts "#{id}\t#{pmid_title[id]}\t#{year}\t#{e[1]}"
-  end
-}
+rdb.close

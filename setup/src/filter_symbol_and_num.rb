@@ -4,7 +4,7 @@ $<.each{|l|
   
   ary = str[3].gsub(/\(|\)|\{\}/," ").downcase.split(" ")
   tmp = []
-  ary.each do |e|
+  ary.each do |e|p
     if e =~ /[a-z]/
       if e =~ /[0-9]/
         tmp.push e.sub(/[\.,]{1,}$/, "")
@@ -12,7 +12,6 @@ $<.each{|l|
         tmp.push e.gsub(/[^a-z]/," ")
       end
     end
-
   end
     
   str[3] = tmp.join(" ").gsub(/(\s{2,})/," ").gsub(/^\s|\s$/, "")

@@ -2,7 +2,7 @@
 require 'tokyocabinet'
 require 'tokyotyrant'
 require 'yaml'
-require "#{File::expand_path(File::dirname(__FILE__))}/exceptions.rb"
+require "#{File.expand_path(File.dirname(__FILE__))}/exceptions.rb"
 include TokyoTyrant
 
 class AccessDB
